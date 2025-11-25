@@ -166,16 +166,6 @@ export default function SimulationsPage() {
                             className="pl-9"
                         />
                     </div>
-
-                    <div className="flex gap-3 text-xs text-slate-600">
-                        <span className="rounded-full bg-slate-100 px-3 py-1 font-medium">
-                            Total simulaciones: {simulations.length}
-                        </span>
-
-                        <span className="rounded-full bg-green-50 px-3 py-1 font-medium text-green-700">
-                            Guardadas: {savedSimulations.length}
-                        </span>
-                    </div>
                 </div>
 
                 {/* TABLE */}
