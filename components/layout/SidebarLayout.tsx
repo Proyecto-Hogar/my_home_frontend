@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {usePathname} from "next/navigation";
+import {usePathname, useRouter} from "next/navigation";
 import {Calculator, HelpCircle, Home, LogOut, Menu, MessageSquare, Settings, Users,} from "lucide-react";
 
 import {Button} from "@/components/ui/button";
@@ -87,6 +87,13 @@ function Sidebar({
     username: string;
     signOut: () => void;
 }) {
+    const router = useRouter();
+
+    const handleLogout = () => {
+        signOut();
+        router.replace("/login"); // ← redirecciona correctamente
+    };
+
     return (
         <div className="flex flex-col h-full">
             {/* LOGO */}
@@ -149,7 +156,7 @@ function Sidebar({
                     </DropdownMenuTrigger>
 
                     <DropdownMenuContent side="top" className="w-56">
-                        <DropdownMenuItem onClick={signOut}>
+                        <DropdownMenuItem onClick={handleLogout}>
                             <LogOut className="w-4 h-4 mr-2" />
                             Cerrar sesión
                         </DropdownMenuItem>
