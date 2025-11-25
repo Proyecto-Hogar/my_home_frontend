@@ -27,46 +27,28 @@ export abstract class BaseService {
         return url.toString();
     }
 
-    protected async request<T>(
-        url: string,
-        options: RequestInit = {}
-    ): Promise<T> {
-        try {
-            const res = await fetch(url, {
-                ...options,
-                headers: {
-                    "Content-Type": "application/json",
-                    ...(options.headers || {}),
-                },
-            });
+    protected async request<T>(url: string, options: RequestInit = {}): Promise<T> {
+        const res = await fetch(url, {
+            ...options,
+            headers: {
+                "Content-Type": "application/json",
+                ...(options.headers || {}),
+            },
+        });
 
-            const text = await res.text();
-            let data: unknown = null;
-            if (text) {
-                try {
-                    data = JSON.parse(text);
-                } catch {
-                    data = text;
-                }
-            }
+        const text = await res.text();
+        const data: unknown = text ? JSON.parse(text) : null;
 
-            if (!res.ok) {
-                const message =
-                    typeof data === "object" && data !== null && "message" in data
-                        ? String((data as { message?: unknown }).message)
-                        : `Error en la solicitud (${res.status})`;
-                throw new Error(message);
-            }
+        if (!res.ok) {
+            const message =
+                typeof data === "object" && data !== null && "message" in data
+                    ? String((data as { message?: unknown }).message)
+                    : `Error en la solicitud (${res.status})`;
 
-            return data as T;
-        } catch (error) {
-            if (error instanceof Error) {
-                console.error("HTTP Error:", error);
-                throw new Error(error.message);
-            }
-
-            console.error("HTTP Error (desconocido):", error);
-            throw new Error("Error inesperado");
+            // Lanzar el error directamente SIN catch lo evita
+            throw new Error(message);
         }
+
+        return data as T;
     }
 }

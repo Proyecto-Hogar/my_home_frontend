@@ -1,14 +1,27 @@
 import {EnumMapper} from "@/mappers/enum.mapper";
 import {
     CapitalizationPeriodEnum,
-    CurrencyEnum, GracePeriodEntity, GracePeriodResponse, GraceTypeEnum, InstallmentEntity, InstallmentResponse,
+    CurrencyEnum,
+    GracePeriodEntity,
+    GracePeriodResponse,
+    GraceTypeEnum,
+    InstallmentEntity,
+    InstallmentResponse,
     InterestRateEntity,
-    InterestRateResponse, LoanParametersEntity, LoanParametersResponse, LoanSimulationEntity, LoanSimulationResponse,
+    InterestRateResponse,
+    LoanParametersEntity,
+    LoanParametersResponse,
+    LoanSimulationEntity,
+    LoanSimulationResponse,
     MoneyEntity,
-    MoneyResponse, PaymentPlanEntity, PaymentPlanResponse, RateTypeEnum, SimulationStatusEnum,
-    SubsidyEntityLoan, SubsidyLoanResponse
+    MoneyResponse,
+    PaymentPlanEntity,
+    PaymentPlanResponse,
+    RateTypeEnum,
+    SimulationStatusEnum,
+    SubsidyEntityLoan,
+    SubsidyLoanResponse
 } from "@/types/loan-simulation.types";
-import {SubsidyEntity} from "@/types/subsidy.types";
 
 // -------- MONEY --------
 export const mapMoney = (dto: MoneyResponse): MoneyEntity => ({
