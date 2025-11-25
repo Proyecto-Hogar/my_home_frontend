@@ -13,8 +13,11 @@ export abstract class BaseService {
         return `${this.basePath}${this.resourceEndpoint}`;
     }
 
-    protected buildUrl(path: string, query?: Record<string, string | number | boolean | undefined>): string {
-        const url = new URL(path, this.basePath);
+    protected buildUrl(path: string, query?: Record<string, unknown>): string {
+        const cleanBase = this.basePath.replace(/\/+$/, "");
+        const cleanPath = path.replace(/^\/+/, "");
+
+        const url = new URL(`${cleanBase}/${cleanPath}`);
 
         if (query) {
             Object.entries(query).forEach(([key, value]) => {
@@ -45,7 +48,6 @@ export abstract class BaseService {
                     ? String((data as { message?: unknown }).message)
                     : `Error en la solicitud (${res.status})`;
 
-            // Lanzar el error directamente SIN catch lo evita
             throw new Error(message);
         }
 
