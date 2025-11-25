@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import {getAuthenticationService} from "@/services/customer.service";
+import {getAuthenticationService} from "@/services/authentication.service";
 
 interface RegisterForm {
     username: string;
