@@ -5,7 +5,7 @@ import {mapCustomerFromResponse, mapCustomerToCreateRequest,} from "@/mappers/cu
 export class CustomerService extends BaseService {
     constructor() {
         super();
-        this.resourceEndpoint = "/customers";
+        this.resourceEndpoint = "customers";
     }
 
     async getAll(): Promise<CustomerEntity[]> {

@@ -24,33 +24,29 @@ import {StorageService} from "@/utils/storage";
 export class AuthenticationService extends BaseService {
     constructor() {
         super();
-        this.resourceEndpoint = "/authentication";
+        this.resourceEndpoint = "authentication";
     }
 
     async signUp(data: SignUpRequest): Promise<UserEntity> {
-        const res = await this.request<UserResponse>(
-            `${this.resourcePath()}/sign-up`,
-            {
-                method: "POST",
-                body: JSON.stringify(data),
-            }
-        );
+        const url = this.buildUrl(`${this.resourceEndpoint}/sign-up`);
+
+        const res = await this.request<UserResponse>(url, {
+            method: "POST",
+            body: JSON.stringify(data),
+        });
 
         return mapUserFromResponse(res);
     }
 
     async signIn(data: SignInRequest): Promise<UserEntity> {
-        const res = await this.request<AuthenticatedUserResponse>(
-            `${this.resourcePath()}/sign-in`,
-            {
-                method: "POST",
-                body: JSON.stringify(data),
-            }
-        );
+        const url = this.buildUrl(`${this.resourceEndpoint}/sign-in`);
 
-        if (res.token) {
-            StorageService.setToken(res.token);
-        }
+        const res = await this.request<AuthenticatedUserResponse>(url, {
+            method: "POST",
+            body: JSON.stringify(data),
+        });
+
+        if (res.token) StorageService.setToken(res.token);
 
         return mapAuthenticatedUserFromResponse(res);
     }
@@ -58,53 +54,51 @@ export class AuthenticationService extends BaseService {
     async setInitialPassword(
         data: SetInitialPasswordRequest
     ): Promise<SetCompletedInitialPasswordResponse> {
-        const res = await this.request<SetCompletedInitialPasswordResponse>(
-            `${this.resourcePath()}/set-initial-password`,
-            {
-                method: "POST",
-                body: JSON.stringify(data),
-            }
-        );
+        const url = this.buildUrl(`${this.resourceEndpoint}/set-initial-password`);
+
+        const res = await this.request<SetCompletedInitialPasswordResponse>(url, {
+            method: "POST",
+            body: JSON.stringify(data),
+        });
 
         return mapSetCompletedInitialPasswordFromResponse(res);
     }
 
     async forgotPassword(email: string): Promise<boolean> {
-        await this.request(`${this.resourcePath()}/forgot-password?email=${email}`, {
-            method: "POST",
+        const url = this.buildUrl(`${this.resourceEndpoint}/forgot-password`, {
+            email,
         });
 
+        await this.request(url, { method: "POST" });
         return true;
     }
 
     async resetPassword(
         data: ResetPasswordRequest
     ): Promise<ResetCompletedPasswordResponse> {
-        const res = await this.request<ResetCompletedPasswordResponse>(
-            `${this.resourcePath()}/reset-password`,
-            {
-                method: "POST",
-                body: JSON.stringify(data),
-            }
-        );
+        const url = this.buildUrl(`${this.resourceEndpoint}/reset-password`);
+
+        const res = await this.request<ResetCompletedPasswordResponse>(url, {
+            method: "POST",
+            body: JSON.stringify(data),
+        });
 
         return mapResetCompletedPasswordFromResponse(res);
     }
 
     async resendActivationToken(userId: string): Promise<boolean> {
-        await this.request(
-            `${this.resourcePath()}/resend-activation-token?userId=${userId}`,
-            { method: "POST" }
-        );
+        const url = this.buildUrl(`${this.resourceEndpoint}/resend-activation-token`, {
+            userId,
+        });
 
+        await this.request(url, { method: "POST" });
         return true;
     }
 
     async getCurrentUser(): Promise<UserEntity> {
-        const res = await this.request<UserResponse>(
-            `${this.resourcePath()}/me`,
-            { method: "GET" }
-        );
+        const url = this.buildUrl(`${this.resourceEndpoint}/me`);
+
+        const res = await this.request<UserResponse>(url, { method: "GET" });
 
         return mapUserFromResponse(res);
     }
