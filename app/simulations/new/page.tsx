@@ -426,8 +426,7 @@ export default function NewLoanSimulationPage() {
         try {
             // If there's an existing simulation, delete it first
             if (generatedSimulation?.id) {
-                // TODO: usar simulationService.delete(generatedSimulation.id)
-                console.log("Deleting previous simulation:", generatedSimulation.id);
+                await simulationService.delete(generatedSimulation.id)
             }
 
             const payload: CreateSimulationRequest = {
@@ -495,6 +494,10 @@ export default function NewLoanSimulationPage() {
         try {
             toast.success("Crédito guardado exitosamente");
 
+            if (generatedSimulation?.id) {
+                await simulationService.save(generatedSimulation.id)
+            }
+
             setTimeout(() => {
                 router.push("/simulations");
             }, 1500);
@@ -506,6 +509,21 @@ export default function NewLoanSimulationPage() {
             toast.error("Error", { description: message });
         } finally {
             setSubmitting(false);
+        }
+    }
+
+    async function handleCancel() {
+        try {
+            if (generatedSimulation?.id) {
+                await simulationService.save(generatedSimulation.id)
+            }
+            router.push("/simulations");
+        } catch (error) {
+            const message =
+                error instanceof Error
+                    ? error.message
+                    : "Error al eliminar el crédito";
+            toast.error("Error", { description: message });
         }
     }
 
@@ -529,7 +547,7 @@ export default function NewLoanSimulationPage() {
                         <Button
                             type="button"
                             variant="outline"
-                            onClick={() => router.push("/simulations")}
+                            onClick={handleCancel}
                         >
                             Cancelar
                         </Button>

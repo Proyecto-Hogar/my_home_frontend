@@ -41,6 +41,21 @@ export class LoanSimulationService extends BaseService {
 
         return mapLoanSimulation(response);
     }
+
+    async delete(id: string): Promise<void> {
+        const url = this.buildUrl(`${this.resourceEndpoint}/${id}`);
+        await this.request(url, {
+            method: "DELETE",
+        });
+    }
+
+    async save(id: string): Promise<LoanSimulationEntity> {
+        const url = this.buildUrl(`${this.resourceEndpoint}/${id}/save`);
+        const response = await this.request<LoanSimulationResponse>(url, {
+            method: "POST",
+        });
+        return mapLoanSimulation(response);
+    }
 }
 
 let loanSimulationServiceInstance: LoanSimulationService | null = null;
