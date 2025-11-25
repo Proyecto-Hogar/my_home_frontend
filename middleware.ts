@@ -6,7 +6,6 @@ export function middleware(request: Request) {
     const pathname = new URL(request.url).pathname;
 
     const isAuthRoute = pathname.startsWith("/login");
-    const isAdminRoute = pathname.startsWith("/admin");
 
     if (!token && !isAuthRoute) {
         return NextResponse.redirect(new URL("/login", request.url));
