@@ -15,7 +15,7 @@ export const mapAuthenticatedUserFromResponse = (
     email: dto.email ?? '',
     username: dto.username ?? '',
     password: '',
-    accountStatus: EnumMapper.mapStringToEnum("", AccountStatusEnum, AccountStatusEnum.ACTIVE),
+    accountStatus: AccountStatusEnum.ACTIVE,
     failedLoginAttempts: 0,
     lastLoginAt: null,
     passwordChangedAt: null,
