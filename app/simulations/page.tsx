@@ -10,31 +10,71 @@ import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 
 import {getLoanSimulationService} from "@/services/loan-simulation.service";
+import {getCustomerService} from "@/services/customer.service";
+import {getPropertyService} from "@/services/property.service";
 import {LoanSimulationEntity, SimulationStatusEnum,} from "@/types/loan-simulation.types";
+import type {CustomerEntity} from "@/types/customer.types";
+import type {PropertyEntity} from "@/types/property.types";
 
 export default function SimulationsPage() {
     const router = useRouter();
     const simulationService = getLoanSimulationService();
+    const customerService = getCustomerService();
+    const propertyService = getPropertyService();
 
     const [simulations, setSimulations] = useState<LoanSimulationEntity[]>([]);
+    const [customers, setCustomers] = useState<CustomerEntity[]>([]);
+    const [properties, setProperties] = useState<PropertyEntity[]>([]);
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState("");
 
     useEffect(() => {
-        loadSimulations().then();
+        loadAllData().then();
     }, []);
 
-    async function loadSimulations() {
+    async function loadAllData() {
         try {
             setLoading(true);
-            const data = await simulationService.getAll();
-            setSimulations(data || []);
+
+            // Load all data in parallel
+            const [simulationsData, customersData, propertiesData] = await Promise.all([
+                simulationService.getAll(),
+                customerService.getAll(),
+                propertyService.getAll(),
+            ]);
+
+            setSimulations(simulationsData || []);
+            setCustomers(customersData || []);
+            setProperties(propertiesData || []);
         } catch (error) {
             console.error(error);
-            toast.error("Error al cargar simulaciones");
+            toast.error("Error al cargar datos");
         } finally {
             setLoading(false);
         }
+    }
+
+    // Helper functions to get names
+    function getCustomerName(customerId: string): string {
+        const customer = customers.find(c => c.id === customerId);
+        return customer?.fullName.fullName || "Cliente desconocido";
+    }
+
+    function getCustomerEmail(customerId: string): string {
+        const customer = customers.find(c => c.id === customerId);
+        return customer?.contactInfo.email || "";
+    }
+
+    function getPropertyCode(propertyId: string | null): string {
+        if (!propertyId) return "-";
+        const property = properties.find(p => p.id === propertyId);
+        return property?.propertyCode || "Propiedad desconocida";
+    }
+
+    function getPropertyType(propertyId: string | null): string {
+        if (!propertyId) return "";
+        const property = properties.find(p => p.id === propertyId);
+        return property?.propertyType || "";
     }
 
     const savedSimulations = useMemo(
@@ -48,15 +88,18 @@ export default function SimulationsPage() {
         const term = search.toLowerCase();
 
         return savedSimulations.filter((sim) => {
+            const customerName = getCustomerName(sim.customerId).toLowerCase();
+            const customerEmail = getCustomerEmail(sim.customerId).toLowerCase();
+            const propertyCode = getPropertyCode(sim.propertyId).toLowerCase();
+
             return (
-                sim.id.toLowerCase().includes(term) ||
-                sim.customerId.toLowerCase().includes(term) ||
-                (sim.propertyId ?? "").toLowerCase().includes(term) ||
-                sim.institutionId.toLowerCase().includes(term) ||
-                sim.loanProgramId.toLowerCase().includes(term)
+                customerName.includes(term) ||
+                customerEmail.includes(term) ||
+                propertyCode.includes(term) ||
+                sim.parameters.loanAmount.amount.toString().includes(term)
             );
         });
-    }, [savedSimulations, search]);
+    }, [savedSimulations, search, customers, properties]);
 
     function formatCurrency(amount?: number, currency = "PEN") {
         if (amount == null) return "-";
@@ -90,14 +133,14 @@ export default function SimulationsPage() {
                             Simulaciones de crédito
                         </h1>
                         <p className="text-sm text-muted-foreground">
-                            Visualiza las simulaciones guardadas (estado SAVED).
+                            Visualiza las simulaciones guardadas y genera nuevas.
                         </p>
                     </div>
 
                     <div className="flex items-center gap-3">
                         <Button
                             variant="outline"
-                            onClick={loadSimulations}
+                            onClick={loadAllData}
                             disabled={loading}
                         >
                             {loading ? "Actualizando..." : "Actualizar"}
@@ -119,7 +162,7 @@ export default function SimulationsPage() {
                         <Input
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Buscar por ID, cliente, institución…"
+                            placeholder="Buscar por cliente, propiedad, monto..."
                             className="pl-9"
                         />
                     </div>
@@ -130,7 +173,7 @@ export default function SimulationsPage() {
                         </span>
 
                         <span className="rounded-full bg-green-50 px-3 py-1 font-medium text-green-700">
-                            Estado “SAVED”: {savedSimulations.length}
+                            Guardadas: {savedSimulations.length}
                         </span>
                     </div>
                 </div>
@@ -155,44 +198,56 @@ export default function SimulationsPage() {
                             <table className="min-w-full border-collapse text-sm">
                                 <thead className="sticky top-0 z-10 bg-slate-50">
                                 <tr className="border-b border-slate-200 text-xs uppercase text-slate-500">
-                                    <th className="px-4 py-3 text-left">ID</th>
                                     <th className="px-4 py-3 text-left">Cliente</th>
                                     <th className="px-4 py-3 text-left">Propiedad</th>
-                                    <th className="px-4 py-3 text-right">Monto</th>
-                                    <th className="px-4 py-3 text-right">Cuota</th>
+                                    <th className="px-4 py-3 text-right">Monto Préstamo</th>
+                                    <th className="px-4 py-3 text-right">Cuota Mensual</th>
                                     <th className="px-4 py-3 text-right">TCEA</th>
                                     <th className="px-4 py-3 text-right">Plazo</th>
-                                    <th className="px-4 py-3 text-left">Creado</th>
+                                    <th className="px-4 py-3 text-left">Fecha Creación</th>
                                     <th className="px-4 py-3 text-center">Acciones</th>
                                 </tr>
                                 </thead>
 
                                 <tbody>
                                 {filteredSimulations.map((sim) => {
-                                    const loanAmount =
-                                        sim.parameters.loanAmount.amount;
-
-                                    const monthlyPayment =
-                                        sim.paymentPlan?.monthlyPayment.amount;
+                                    const customerName = getCustomerName(sim.customerId);
+                                    const customerEmail = getCustomerEmail(sim.customerId);
+                                    const propertyCode = getPropertyCode(sim.propertyId);
+                                    const propertyType = getPropertyType(sim.propertyId);
+                                    const loanAmount = sim.parameters.loanAmount.amount;
+                                    const monthlyPayment = sim.paymentPlan?.monthlyPayment.amount;
 
                                     return (
                                         <tr
                                             key={sim.id}
-                                            className="border-b border-slate-100 hover:bg-slate-50/70"
+                                            className="border-b border-slate-100 hover:bg-slate-50/70 transition-colors"
                                         >
-                                            <td className="px-4 py-3 text-xs font-mono text-slate-600">
-                                                {sim.id}
+                                            <td className="px-4 py-3">
+                                                <div className="flex flex-col">
+                                                    <span className="font-medium text-slate-800">
+                                                        {customerName}
+                                                    </span>
+                                                    <span className="text-xs text-slate-500">
+                                                        {customerEmail}
+                                                    </span>
+                                                </div>
                                             </td>
 
-                                            <td className="px-4 py-3 text-slate-700">
-                                                {sim.customerId}
+                                            <td className="px-4 py-3">
+                                                <div className="flex flex-col">
+                                                    <span className="font-medium text-slate-700">
+                                                        {propertyCode}
+                                                    </span>
+                                                    {propertyType && (
+                                                        <span className="text-xs text-slate-500">
+                                                            {propertyType}
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </td>
 
-                                            <td className="px-4 py-3 text-slate-700">
-                                                {sim.propertyId ?? "-"}
-                                            </td>
-
-                                            <td className="px-4 py-3 text-right text-slate-800">
+                                            <td className="px-4 py-3 text-right font-semibold text-slate-800">
                                                 {formatCurrency(loanAmount)}
                                             </td>
 
@@ -203,15 +258,18 @@ export default function SimulationsPage() {
                                             </td>
 
                                             <td className="px-4 py-3 text-right">
-                                                {sim.paymentPlan?.tcea != null
-                                                    ? `${sim.paymentPlan.tcea.toFixed(
-                                                        2
-                                                    )}%`
-                                                    : "-"}
+                                                <span className={sim.paymentPlan?.tcea ? "font-medium text-green-700" : "text-slate-400"}>
+                                                    {sim.paymentPlan?.tcea != null
+                                                        ? `${sim.paymentPlan.tcea.toFixed(2)}%`
+                                                        : "-"}
+                                                </span>
                                             </td>
 
-                                            <td className="px-4 py-3 text-right">
-                                                {sim.parameters.termInMonths} m
+                                            <td className="px-4 py-3 text-right text-slate-700">
+                                                {sim.parameters.termInMonths} meses
+                                                <span className="block text-xs text-slate-500">
+                                                    ({(sim.parameters.termInMonths / 12).toFixed(1)} años)
+                                                </span>
                                             </td>
 
                                             <td className="px-4 py-3 text-slate-600 text-xs">
@@ -224,9 +282,7 @@ export default function SimulationsPage() {
                                                     variant="outline"
                                                     size="sm"
                                                     onClick={() =>
-                                                        router.push(
-                                                            `/simulations/${sim.id}`
-                                                        )
+                                                        router.push(`/simulations/${sim.id}`)
                                                     }
                                                 >
                                                     Ver detalle

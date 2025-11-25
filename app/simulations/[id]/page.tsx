@@ -133,8 +133,7 @@ export default function SimulationDetailsPage() {
                 </div>
 
                 {/* IDENTIFICADORES */}
-                <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <InfoCard label="ID Simulación" value={simulation.id} />
+                <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <InfoCard label="Fecha" value={formatDate(simulation.simulationDate)} />
                     <InfoCard label="Institución" value={institution?.institutionName || "-"} />
                 </div>
