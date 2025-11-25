@@ -19,6 +19,7 @@ import {
 } from "@/mappers/authentication.mapper";
 
 import {mapUserFromResponse} from "@/mappers/user.mapper";
+import {StorageService} from "@/utils/storage";
 
 export class AuthenticationService extends BaseService {
     constructor() {
@@ -46,6 +47,10 @@ export class AuthenticationService extends BaseService {
                 body: JSON.stringify(data),
             }
         );
+
+        if (res.token) {
+            StorageService.setToken(res.token);
+        }
 
         return mapAuthenticatedUserFromResponse(res);
     }
