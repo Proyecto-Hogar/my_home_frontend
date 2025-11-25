@@ -156,7 +156,7 @@ export interface PaymentPlanResponse {
 export interface LoanSimulationEntity {
     id: string;
     customerId: string;
-    propertyId: string | null;
+    propertyId: string;
     institutionId: string;
     loanProgramId: string;
     simulationDate: string;
@@ -170,7 +170,7 @@ export interface LoanSimulationEntity {
 export interface LoanSimulationResponse {
     id: string;
     customerId: string;
-    propertyId: string | null;
+    propertyId: string;
     institutionId: string;
     loanProgramId: string;
     simulationDate: string;
