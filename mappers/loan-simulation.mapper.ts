@@ -53,6 +53,7 @@ export const mapParameters = (dto: LoanParametersResponse): LoanParametersEntity
     currency: EnumMapper.mapStringToEnum(dto.currency, CurrencyEnum, CurrencyEnum.PEN),
     interestRate: mapInterestRate(dto.interestRate),
     gracePeriod: mapGracePeriod(dto.gracePeriod),
+    discountRate: dto.discountRate,
 });
 
 // -------- INSTALLMENT --------

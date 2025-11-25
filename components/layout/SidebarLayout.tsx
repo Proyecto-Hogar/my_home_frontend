@@ -10,7 +10,7 @@ import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger
 import {Avatar, AvatarFallback} from "@/components/ui/avatar";
 import {useAuth} from "@/context/AuthContext";
 import React from "react";
-import { DialogTitle } from "@radix-ui/react-dialog";
+import {DialogTitle} from "@radix-ui/react-dialog";
 import {DialogDescription} from "@/components/ui/dialog";
 
 const navItems = [
@@ -25,8 +25,8 @@ const navItems = [
         icon: Users,
     },
     {
-        label: "Simulador",
-        href: "/simulator",
+        label: "Simulaciones",
+        href: "/simulations",
         icon: Calculator,
     },
 ];
@@ -38,8 +38,7 @@ export default function SidebarLayout({ children }: { children: React.ReactNode 
     const username = state.user?.username ?? "Usuario";
 
     return (
-        <div className="flex h-screen bg-gray-50">
-
+        <div className="flex h-screen overflow-hidden bg-gray-50">
             {/* MOBILE MENU BUTTON */}
             <div className="lg:hidden p-4">
                 <Sheet>
@@ -54,14 +53,24 @@ export default function SidebarLayout({ children }: { children: React.ReactNode 
                         <DialogDescription className="sr-only">
                             Navegación lateral de la aplicación
                         </DialogDescription>
-                        <Sidebar navItems={navItems} pathname={pathname} username={username} signOut={signOut} />
+                        <Sidebar
+                            navItems={navItems}
+                            pathname={pathname}
+                            username={username}
+                            signOut={signOut}
+                        />
                     </SheetContent>
                 </Sheet>
             </div>
 
             {/* DESKTOP SIDEBAR */}
             <aside className="hidden lg:flex w-64 border-r bg-white">
-                <Sidebar navItems={navItems} pathname={pathname} username={username} signOut={signOut} />
+                <Sidebar
+                    navItems={navItems}
+                    pathname={pathname}
+                    username={username}
+                    signOut={signOut}
+                />
             </aside>
 
             {/* MAIN CONTENT */}
@@ -91,18 +100,21 @@ function Sidebar({
 
     const handleLogout = () => {
         signOut();
-        router.replace("/login"); // ← redirecciona correctamente
+        router.replace("/login");
     };
 
     return (
         <div className="flex flex-col h-full">
             {/* LOGO */}
             <div className="h-16 flex items-center px-6 border-b">
-                <Link href="/properties" className="flex items-center gap-3">
+                {/* 🔹 Llevo el logo a /simulations para que sea el “home” de créditos */}
+                <Link href="/simulations" className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-lg flex items-center justify-center">
                         <Home className="text-white w-6 h-6" />
                     </div>
-                    <span className="text-lg font-semibold text-gray-900">Proyecto Hogar</span>
+                    <span className="text-lg font-semibold text-gray-900">
+            Proyecto Hogar
+          </span>
                 </Link>
             </div>
 
@@ -117,7 +129,7 @@ function Sidebar({
                             key={item.href}
                             href={item.href}
                             className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition 
-                ${
+              ${
                                 active
                                     ? "bg-green-50 text-green-700"
                                     : "text-gray-700 hover:bg-gray-50"

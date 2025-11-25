@@ -75,6 +75,7 @@ export interface LoanParametersEntity {
     currency: CurrencyEnum;
     interestRate: InterestRateEntity;
     gracePeriod: GracePeriodEntity;
+    discountRate?: number | null;
 }
 
 export interface LoanParametersResponse {
@@ -85,6 +86,7 @@ export interface LoanParametersResponse {
     currency: string;
     interestRate: InterestRateResponse;
     gracePeriod: GracePeriodResponse;
+    discountRate?: number | null;
 }
 
 // -------- Installments --------
@@ -154,7 +156,7 @@ export interface PaymentPlanResponse {
 export interface LoanSimulationEntity {
     id: string;
     customerId: string;
-    propertyId: string | null;
+    propertyId: string;
     institutionId: string;
     loanProgramId: string;
     simulationDate: string;
@@ -168,7 +170,7 @@ export interface LoanSimulationEntity {
 export interface LoanSimulationResponse {
     id: string;
     customerId: string;
-    propertyId: string | null;
+    propertyId: string;
     institutionId: string;
     loanProgramId: string;
     simulationDate: string;

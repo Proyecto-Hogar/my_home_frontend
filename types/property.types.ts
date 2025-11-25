@@ -116,9 +116,11 @@ export interface PropertyResponse {
 
     status: string;
 
-    parkingSpaces: number;
-    parkingPrice: { amount: number; currency: string };
-    parkingTotal: { amount: number; currency: string };
+    parking: {
+        parkingSpaces: number;
+        parkingPrice: { amount: number; currency: string };
+        parkingTotal: { amount: number; currency: string };
+    };
 
     constructionYear: number;
 
@@ -141,27 +143,26 @@ export interface PropertyResponse {
     storageRoom: boolean;
 
     pricing: {
-        amount: number;
-        currency: string;
-        priceInSoles: number | null;
-        priceInSolesCurrency: string | null;
-        priceInDollars: number | null;
-        priceInDollarsCurrency: string | null;
+        listPrice: {
+            amount: { amount: number; currency: string };
+            priceInSoles: { amount: number; currency: string } | null;
+            priceInDollars: { amount: number; currency: string } | null;
+        };
+
         builtArea: number;
         totalArea: number;
 
-        pricePerSquareMeterAmount: number;
-        pricePerSquareMeterCurrency: string;
-        maintenanceFeeAmount: number;
-        maintenanceFeeCurrency: string;
+        listPriceCurrency: string;
+
+        pricePerSquareMeter: { amount: number; currency: string };
+        maintenanceFee: { amount: number; currency: string };
     };
 
     financiability: {
-        maxFinanceableAmount: number;
-        maxFinanceableCurrency: string;
+        maxFinanceableAmount: { amount: number; currency: string };
         eligibleForMiVivienda: boolean;
         eligibleForBFH: boolean;
-        miViviendaReason: string | null;
+        miViviendaIneligibilityReason: string | null;
     };
 
     primaryImageFileId: string | null;
@@ -171,6 +172,9 @@ export interface PropertyResponse {
         certificationType: string | null;
         bonusEligible: boolean;
     };
+
+    available: boolean;
+    eligibleForBonoVerde: boolean;
 }
 
 

@@ -20,16 +20,22 @@ export const mapPropertyFromResponse = (dto: PropertyResponse): PropertyEntity =
         PropertyStatusEnum.AVAILABLE
     ),
 
+    // --------------------------------------------------------
+    // PARKING
+    // --------------------------------------------------------
     parking: {
-        parkingSpaces: dto.parkingSpaces,
-        parkingPriceAmount: dto.parkingPrice.amount,
-        parkingPriceCurrency: dto.parkingPrice.currency,
-        parkingTotalAmount: dto.parkingTotal.amount,
-        parkingTotalCurrency: dto.parkingTotal.currency,
-        hasParking: dto.parkingSpaces > 0,
+        parkingSpaces: dto.parking?.parkingSpaces ?? 0,
+        parkingPriceAmount: dto.parking?.parkingPrice?.amount ?? 0,
+        parkingPriceCurrency: dto.parking?.parkingPrice?.currency ?? "PEN",
+        parkingTotalAmount: dto.parking?.parkingTotal?.amount ?? 0,
+        parkingTotalCurrency: dto.parking?.parkingTotal?.currency ?? "PEN",
+        hasParking: (dto.parking?.parkingSpaces ?? 0) > 0,
     },
 
-    constructionYear: dto.constructionYear,
+    // --------------------------------------------------------
+    // BASIC INFO
+    // --------------------------------------------------------
+    constructionYear: dto.constructionYear ?? null,
 
     finishingQuality: EnumMapper.mapStringToEnum(
         dto.finishingQuality,
@@ -41,11 +47,7 @@ export const mapPropertyFromResponse = (dto: PropertyResponse): PropertyEntity =
     hasLaundryArea: dto.hasLaundryArea,
 
     facing: dto.facing
-        ? EnumMapper.mapStringToEnum(
-            dto.facing,
-            OrientationEnum,
-            OrientationEnum.NORTH
-        )
+        ? EnumMapper.mapStringToEnum(dto.facing, OrientationEnum, OrientationEnum.NORTH)
         : null,
 
     features: dto.features ?? [],
@@ -63,41 +65,54 @@ export const mapPropertyFromResponse = (dto: PropertyResponse): PropertyEntity =
 
     storageRoom: dto.storageRoom,
 
+    // --------------------------------------------------------
+    // PRICING
+    // --------------------------------------------------------
     pricing: {
-        priceAmount: dto.pricing.amount,
-        priceCurrency: dto.pricing.currency,
+        priceAmount: dto.pricing?.listPrice?.amount?.amount ?? 0,
+        priceCurrency: dto.pricing?.listPrice?.amount?.currency ?? "PEN",
 
-        priceInSoles: dto.pricing.priceInSoles,
-        priceInSolesCurrency: dto.pricing.priceInSolesCurrency,
+        priceInSoles: dto.pricing?.listPrice?.priceInSoles?.amount ?? null,
+        priceInSolesCurrency: dto.pricing?.listPrice?.priceInSoles?.currency ?? null,
 
-        priceInDollars: dto.pricing.priceInDollars,
-        priceInDollarsCurrency: dto.pricing.priceInDollarsCurrency,
+        priceInDollars: dto.pricing?.listPrice?.priceInDollars?.amount ?? null,
+        priceInDollarsCurrency: dto.pricing?.listPrice?.priceInDollars?.currency ?? null,
 
-        builtArea: dto.pricing.builtArea,
-        totalArea: dto.pricing.totalArea,
+        builtArea: dto.pricing?.builtArea ?? 0,
+        totalArea: dto.pricing?.totalArea ?? 0,
 
-        pricePerSquareMeterAmount: dto.pricing.pricePerSquareMeterAmount,
-        pricePerSquareMeterCurrency: dto.pricing.pricePerSquareMeterCurrency,
+        pricePerSquareMeterAmount: dto.pricing?.pricePerSquareMeter?.amount ?? 0,
+        pricePerSquareMeterCurrency: dto.pricing?.pricePerSquareMeter?.currency ?? "PEN",
 
-        maintenanceFeeAmount: dto.pricing.maintenanceFeeAmount,
-        maintenanceFeeCurrency: dto.pricing.maintenanceFeeCurrency,
+        maintenanceFeeAmount: dto.pricing?.maintenanceFee?.amount ?? 0,
+        maintenanceFeeCurrency: dto.pricing?.maintenanceFee?.currency ?? "PEN",
     },
 
+    // --------------------------------------------------------
+    // FINANCIABILITY
+    // --------------------------------------------------------
     financiability: {
-        maxFinanceableAmount: dto.financiability.maxFinanceableAmount,
-        maxFinanceableCurrency: dto.financiability.maxFinanceableCurrency,
+        maxFinanceableAmount: dto.financiability?.maxFinanceableAmount?.amount ?? 0,
+        maxFinanceableCurrency: dto.financiability?.maxFinanceableAmount?.currency ?? "PEN",
 
-        isEligibleForMiVivienda: dto.financiability.eligibleForMiVivienda,
-        isEligibleForBFH: dto.financiability.eligibleForBFH,
-        miViviendaReason: dto.financiability.miViviendaReason,
+        isEligibleForMiVivienda: dto.financiability?.eligibleForMiVivienda ?? false,
+        isEligibleForBFH: dto.financiability?.eligibleForBFH ?? false,
+
+        miViviendaReason: dto.financiability?.miViviendaIneligibilityReason ?? null,
     },
 
+    // --------------------------------------------------------
+    // IMAGE
+    // --------------------------------------------------------
     primaryImageFileId: dto.primaryImageFileId ?? null,
 
+    // --------------------------------------------------------
+    // SUSTAINABILITY
+    // --------------------------------------------------------
     sustainability: {
-        hasCertification: dto.sustainability.hasCertification,
-        certificationType: dto.sustainability.certificationType,
-        bonusEligible: dto.sustainability.bonusEligible,
+        hasCertification: dto.sustainability?.hasCertification ?? false,
+        certificationType: dto.sustainability?.certificationType ?? null,
+        bonusEligible: dto.sustainability?.bonusEligible ?? false,
     },
 });
 
@@ -106,42 +121,47 @@ export const mapPropertyFromResponse = (dto: PropertyResponse): PropertyEntity =
 // ---------------------------------------------
 export const mapPropertyToCreateRequest = (
     req: CreatePropertyRequest
-): Record<string, string | number | boolean | null | string []> => ({
+): Record<string, unknown> => ({
+    // Básicos
     projectId: req.projectId,
     propertyCode: req.propertyCode,
 
     // Parking
-    parkingSpaces: req.parkingSpaces,
-    parkingPriceAmount: req.parkingPriceAmount,
-    parkingCurrency: req.parkingCurrency,
+    parkingSpaces: req.parkingSpaces ?? 0,
+    parkingPriceAmount: req.parkingPriceAmount ?? 0,
+    parkingCurrency: req.parkingCurrency ?? "PEN",
 
-    // Basic info
-    constructionYear: req.constructionYear,
+    // Info base
+    constructionYear: req.constructionYear ?? null,
     finishingQuality: EnumMapper.mapEnumToString(req.finishingQuality),
-    hasBalcony: req.hasBalcony,
-    hasLaundryArea: req.hasLaundryArea,
+    hasBalcony: req.hasBalcony ?? false,
+    hasLaundryArea: req.hasLaundryArea ?? false,
+
     facing: req.facing ? EnumMapper.mapEnumToString(req.facing) : null,
-    features: req.features,
+    features: req.features ?? [],
 
-    // Property type and layout
+    // Tipo y distribución
     propertyType: EnumMapper.mapEnumToString(req.propertyType),
-    bedrooms: req.bedrooms,
-    bathrooms: req.bathrooms,
-    halfBathrooms: req.halfBathrooms,
-    floor: req.floor,
-    storageRoom: req.storageRoom,
+    bedrooms: req.bedrooms ?? 0,
+    bathrooms: req.bathrooms ?? 0,
+    halfBathrooms: req.halfBathrooms ?? 0,
+    floor: req.floor ?? 0,
+    storageRoom: req.storageRoom ?? false,
 
-    // Pricing
-    priceAmount: req.priceAmount,
-    priceCurrency: req.priceCurrency,
-    builtArea: req.builtArea,
-    totalArea: req.totalArea,
-    maintenanceFeeAmount: req.maintenanceFeeAmount,
+    // Precios / áreas
+    priceAmount: req.priceAmount ?? 0,
+    priceCurrency: req.priceCurrency ?? "PEN",
+    builtArea: req.builtArea ?? 0,
+    totalArea: req.totalArea ?? 0,
+    maintenanceFeeAmount: req.maintenanceFeeAmount ?? 0,
 
-    // Financiability (backend recalculates)
-    isEligibleForMiVivienda: req.isEligibleForMiVivienda,
+    // MiVivienda
+    isEligibleForMiVivienda: req.isEligibleForMiVivienda ?? false,
 
-    // Sustainability
-    hasSustainabilityCertification: req.hasSustainabilityCertification,
-    certificationType: req.certificationType,
+    // Sostenibilidad
+    hasSustainabilityCertification: req.hasSustainabilityCertification ?? false,
+    certificationType:
+        req.hasSustainabilityCertification && req.certificationType
+            ? req.certificationType
+            : null,
 });
