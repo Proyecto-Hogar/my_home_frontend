@@ -4,6 +4,7 @@ import React, {createContext, useContext, useEffect, useReducer} from "react";
 import {StorageService} from "@/utils/storage";
 import {AuthenticationService} from "@/services/authentication.service";
 import type {UserEntity} from "@/types/user.types";
+import {useRouter} from "next/navigation";
 
 interface AuthState {
     user: UserEntity | null;
@@ -23,7 +24,7 @@ const initialState: AuthState = {
     user: null,
     token: null,
     isAuthenticated: false,
-    loading: false,
+    loading: true, // ← IMPORTANTE
     error: null,
 };
 
@@ -39,7 +40,7 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
                 error: null,
             };
         case "LOGOUT":
-            return { ...initialState };
+            return { ...initialState, loading: false };
         case "SET_ERROR":
             return { ...state, error: action.error };
         case "SET_LOADING":
@@ -53,15 +54,18 @@ const AuthContext = createContext<{
     state: AuthState;
     signIn: (email: string, password: string) => Promise<void>;
     signOut: () => void;
+    clearError: () => void;
 }>({
     state: initialState,
     signIn: async () => {},
     signOut: () => {},
+    clearError: () => {},
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [state, dispatch] = useReducer(authReducer, initialState);
     const authService = new AuthenticationService();
+    const router = useRouter();
 
     // Cargar sesión desde localStorage
     useEffect(() => {
@@ -70,6 +74,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         if (token && user) {
             dispatch({ type: "SET_AUTH", user, token });
+        } else {
+            dispatch({ type: "SET_LOADING", loading: false });
         }
     }, []);
 
@@ -80,7 +86,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             const user = await authService.signIn({ email, password });
             const token = StorageService.getToken()!;
 
+            StorageService.setUser(user);
+            StorageService.setToken(token);
+
             dispatch({ type: "SET_AUTH", user, token });
+
+            router.replace("/properties");
         } catch (error: unknown) {
             let message = "Error al iniciar sesión";
 
@@ -88,13 +99,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 message = error.message;
             }
 
-            dispatch({
-                type: "SET_ERROR",
-                error: message,
-            });
+            dispatch({ type: "SET_ERROR", error: message });
+            dispatch({ type: "SET_LOADING", loading: false });
         }
     }
 
+    function clearError() {
+        dispatch({ type: "SET_ERROR", error: null });
+    }
 
     function signOut() {
         StorageService.clearAuthData();
@@ -102,7 +114,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     return (
-        <AuthContext.Provider value={{ state, signIn, signOut }}>
+        <AuthContext.Provider value={{ state, signIn, signOut, clearError }}>
             {children}
         </AuthContext.Provider>
     );
