@@ -2,6 +2,8 @@ import type {Metadata} from "next";
 import {Geist, Geist_Mono} from "next/font/google";
 import "./globals.css";
 import {AuthProvider} from "@/context/AuthContext";
+import {Toaster} from "sonner";
+import React from "react";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -18,17 +20,14 @@ export const metadata: Metadata = {
     description: "Sistema de gestión inmobiliaria",
 };
 
-export default function RootLayout({
-                                       children,
-                                   }: {
-    children: React.ReactNode;
-}) {
+export default function RootLayout({children,}: { children: React.ReactNode; }) {
     return (
         <html lang="es">
         <body
             className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50`}
         >
         <AuthProvider>{children}</AuthProvider>
+        <Toaster richColors position="top-right" />
         </body>
         </html>
     );

@@ -45,7 +45,6 @@ export abstract class BaseService {
                     ? String((data as { message?: unknown }).message)
                     : `Error en la solicitud (${res.status})`;
 
-            // Lanzar el error directamente SIN catch lo evita
             throw new Error(message);
         }
 

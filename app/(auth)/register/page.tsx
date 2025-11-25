@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import React, {useState} from "react";
+import {useRouter} from "next/navigation";
 import {getAuthenticationService} from "@/services/authentication.service";
+import {toast} from "sonner";
 
 interface RegisterForm {
     username: string;
@@ -26,8 +27,8 @@ export default function RegisterPage() {
 
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [success, setSuccess] = useState<string | null>(null);
+    const [error] = useState<string | null>(null);
+    const [success] = useState<string | null>(null);
 
     const isFormValid =
         form.username &&
@@ -43,11 +44,11 @@ export default function RegisterPage() {
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-        setError(null);
-        setSuccess(null);
 
         if (form.password !== form.confirmPassword) {
-            setError("Las contraseñas no coinciden");
+            toast.error("Las contraseñas no coinciden", {
+                description: "Ingresa ambas contraseñas nuevamente.",
+            });
             return;
         }
 
@@ -60,15 +61,23 @@ export default function RegisterPage() {
                 password: form.password,
             });
 
-            setSuccess("¡Cuenta creada exitosamente! Redirigiendo...");
+            toast.success("Cuenta creada", {
+                description: "Redirigiendo al login...",
+            });
 
             setTimeout(() => {
                 router.push("/login");
             }, 1500);
+
         } catch (err) {
             const message =
-                err instanceof Error ? err.message : "Error al crear la cuenta";
-            setError(message);
+                err instanceof Error ? err.message : "Ocurrió un error inesperado";
+
+            toast.error("Error al registrarte", {
+                description: message,
+            });
+        } finally {
+            setIsLoading(false);
         }
     }
 
