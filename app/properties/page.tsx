@@ -421,10 +421,12 @@ export default function PropertiesPage() {
                                                     className="object-cover transition-transform duration-200 group-hover:scale-[1.03]"
                                                 />
                                             ) : (
-                                                <div className="absolute inset-0 flex flex-col items-center justify-center text-xs text-muted-foreground gap-1">
-                                                    <div className="h-8 w-8 rounded-full bg-slate-200 dark:bg-slate-800" />
-                                                    <span>Sin imagen</span>
-                                                </div>
+                                                <Image
+                                                    src="/images/property-placeholder.jpg"
+                                                    alt="Imagen de propiedad por defecto"
+                                                    fill
+                                                    className="object-cover opacity-80"
+                                                />
                                             )}
                                         </div>
 
