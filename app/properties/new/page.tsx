@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Home, Image as ImageIcon } from "lucide-react";
+import Image from "next/image";
 
 import SidebarLayout from "@/components/layout/SidebarLayout";
 import { Button } from "@/components/ui/button";
@@ -24,7 +25,7 @@ import {
     SelectItem,
     SelectValue,
 } from "@/components/ui/select";
-import {getPropertyService} from "@/services/property.service";
+import { getPropertyService } from "@/services/property.service";
 
 const defaultForm: CreatePropertyRequest = {
     projectId: null,
@@ -64,10 +65,11 @@ export default function NewPropertyPage() {
     const [featuresInput, setFeaturesInput] = useState("");
     const [saving, setSaving] = useState(false);
 
-    const [primaryImageFileId, setPrimaryImageFileId] = useState<string | null>(
+    // ---- IMAGEN PRINCIPAL ----
+    const [primaryImageFile, setPrimaryImageFile] = useState<File | null>(null);
+    const [primaryImagePreview, setPrimaryImagePreview] = useState<string | null>(
         null
     );
-
     const fileInputRef = useRef<HTMLInputElement | null>(null);
 
     // ENUM OPTIONS
@@ -117,19 +119,20 @@ export default function NewPropertyPage() {
         fileInputRef.current?.click();
     };
 
-    const handleFileSelected = async (e: ChangeEvent<HTMLInputElement>) => {
+    const handleFileSelected = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        toast.info("Subida pendiente", {
-            description:
-                "Aquí deberás usar tu FileUploadService y guardar el fileId en el backend.",
-        });
+        // Validación simple de tamaño (2MB)
+        const maxSizeMb = 2;
+        if (file.size > maxSizeMb * 1024 * 1024) {
+            toast.error(`La imagen debe pesar menos de ${maxSizeMb} MB.`);
+            return;
+        }
 
-        // EJEMPLO:
-        // const uploadService = getFileService();
-        // const res = await uploadService.upload(file);
-        // setPrimaryImageFileId(res.fileId);
+        setPrimaryImageFile(file);
+        const url = URL.createObjectURL(file);
+        setPrimaryImagePreview(url);
     };
 
     /** VALIDACIÓN PARA PASAR AL STEP 2 */
@@ -156,12 +159,30 @@ export default function NewPropertyPage() {
                     .filter(Boolean),
             };
 
-            await propertyService.create(payload);
+            // 1) Crear propiedad
+            const created = await propertyService.create(payload);
+
+            // 2) Si hay imagen seleccionada, subirla
+            if (primaryImageFile) {
+                try {
+                    await propertyService.uploadPrimaryImage(created.id, primaryImageFile);
+                } catch (err) {
+                    const msg =
+                        err instanceof Error ? err.message : "Error al subir la imagen.";
+                    // No tumbamos la creación si solo falla la imagen
+                    toast.error(
+                        "La propiedad se creó, pero hubo un problema subiendo la imagen.",
+                        { description: msg }
+                    );
+                }
+            }
 
             toast.success("Propiedad registrada correctamente.");
             router.push("/properties");
-        } catch {
-            toast.error("Error al guardar propiedad");
+        } catch (error) {
+            const message =
+                error instanceof Error ? error.message : "Error al guardar propiedad";
+            toast.error("Error al guardar propiedad", { description: message });
         } finally {
             setSaving(false);
         }
@@ -349,7 +370,7 @@ export default function NewPropertyPage() {
 
                                     <InputLabeled
                                         label="Medios baños"
-                                        value={form.halfBathrooms?? ""}
+                                        value={form.halfBathrooms ?? ""}
                                         type="number"
                                         onChange={(e) =>
                                             updateField("halfBathrooms", Number(e.target.value))
@@ -358,7 +379,7 @@ export default function NewPropertyPage() {
 
                                     <InputLabeled
                                         label="Piso"
-                                        value={form.floor?? ""}
+                                        value={form.floor ?? ""}
                                         type="number"
                                         onChange={(e) =>
                                             updateField("floor", Number(e.target.value))
@@ -370,10 +391,7 @@ export default function NewPropertyPage() {
                                         value={form.constructionYear}
                                         type="number"
                                         onChange={(e) =>
-                                            updateField(
-                                                "constructionYear",
-                                                Number(e.target.value)
-                                            )
+                                            updateField("constructionYear", Number(e.target.value))
                                         }
                                     />
 
@@ -571,7 +589,6 @@ export default function NewPropertyPage() {
                                 </h2>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
                                     <BooleanSelect
                                         label="¿Ecoamigable (certificación)?"
                                         value={form.hasSustainabilityCertification}
@@ -616,21 +633,39 @@ export default function NewPropertyPage() {
                                 </h2>
 
                                 <div
-                                    className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center cursor-pointer hover:bg-slate-100"
+                                    className="relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center cursor-pointer hover:bg-slate-100 overflow-hidden"
                                     onClick={handleFileClick}
                                 >
-                                    <ImageIcon className="h-8 w-8 text-slate-400 mb-2" />
-                                    <p className="text-sm font-medium text-slate-700">
-                                        Subir imagen principal
-                                    </p>
-                                    <p className="text-xs text-muted-foreground">
-                                        SVG, PNG, JPG, GIF (máx. 2MB)
-                                    </p>
-
-                                    {primaryImageFileId && (
-                                        <p className="mt-2 text-[11px] text-emerald-600">
-                                            Imagen subida: {primaryImageFileId}
-                                        </p>
+                                    {primaryImagePreview ? (
+                                        <>
+                                            <Image
+                                                src={primaryImagePreview}
+                                                alt="Vista previa de la imagen principal"
+                                                fill
+                                                className="object-cover"
+                                            />
+                                            <div className="absolute inset-0 bg-black/20" />
+                                            <div className="relative z-10 flex flex-col items-center">
+                                                <p className="text-xs text-white mb-1">
+                                                    Haz click para cambiar la imagen
+                                                </p>
+                                                {primaryImageFile && (
+                                                    <p className="text-[11px] text-slate-100">
+                                                        {primaryImageFile.name}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <ImageIcon className="h-8 w-8 text-slate-400 mb-2" />
+                                            <p className="text-sm font-medium text-slate-700">
+                                                Subir imagen principal
+                                            </p>
+                                            <p className="text-xs text-muted-foreground">
+                                                SVG, PNG, JPG, GIF (máx. 2MB)
+                                            </p>
+                                        </>
                                     )}
 
                                     <input
