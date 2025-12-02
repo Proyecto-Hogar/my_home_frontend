@@ -159,17 +159,14 @@ export default function NewPropertyPage() {
                     .filter(Boolean),
             };
 
-            // 1) Crear propiedad
             const created = await propertyService.create(payload);
 
-            // 2) Si hay imagen seleccionada, subirla
             if (primaryImageFile) {
                 try {
                     await propertyService.uploadPrimaryImage(created.id, primaryImageFile);
                 } catch (err) {
                     const msg =
                         err instanceof Error ? err.message : "Error al subir la imagen.";
-                    // No tumbamos la creación si solo falla la imagen
                     toast.error(
                         "La propiedad se creó, pero hubo un problema subiendo la imagen.",
                         { description: msg }
