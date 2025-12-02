@@ -3,7 +3,7 @@ export abstract class BaseService {
     protected resourceEndpoint = "/resources";
 
     protected constructor() {
-        this.basePath = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+        this.basePath = "https://my-home-production.up.railway.app/api/v1";
         if (!this.basePath) {
             console.warn("[BaseService] NEXT_PUBLIC_API_BASE_URL no está definida en .env.local");
         }
