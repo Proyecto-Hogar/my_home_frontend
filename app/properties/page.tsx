@@ -11,6 +11,7 @@ import {Input} from "@/components/ui/input";
 
 import {FinishingQualityEnum, PropertyEntity, PropertyStatusEnum, PropertyTypeEnum,} from "@/types/property.types";
 import {getPropertyService} from "@/services/property.service";
+import Image from "next/image";
 
 const PAGE_SIZE = 9;
 
@@ -411,12 +412,20 @@ export default function PropertiesPage() {
                                     className="group"
                                 >
                                     <div className="flex h-full flex-col rounded-xl border bg-card overflow-hidden shadow-sm transition-all hover:shadow-md hover:-translate-y-[1px]">
-                                        {/* IMAGE PLACEHOLDER */}
-                                        <div className="relative aspect-[4/3] bg-slate-100 dark:bg-slate-900">
-                                            <div className="absolute inset-0 flex items-center justify-center text-xs text-muted-foreground">
-                                                {/* Placeholder simple, sin usar ningún archivo físico */}
-                                                Imagen de la propiedad
-                                            </div>
+                                        <div className="relative aspect-[4/3] bg-slate-100 dark:bg-slate-900 overflow-hidden">
+                                            {property.primaryImageFileId ? (
+                                                <Image
+                                                    src={property.primaryImageFileId}
+                                                    alt={`Propiedad ${property.propertyCode}`}
+                                                    fill
+                                                    className="object-cover transition-transform duration-200 group-hover:scale-[1.03]"
+                                                />
+                                            ) : (
+                                                <div className="absolute inset-0 flex flex-col items-center justify-center text-xs text-muted-foreground gap-1">
+                                                    <div className="h-8 w-8 rounded-full bg-slate-200 dark:bg-slate-800" />
+                                                    <span>Sin imagen</span>
+                                                </div>
+                                            )}
                                         </div>
 
                                         {/* CONTENT */}
