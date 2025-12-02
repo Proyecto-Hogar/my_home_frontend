@@ -37,6 +37,30 @@ export class PropertyService extends BaseService {
 
         return mapPropertyFromResponse(response);
     }
+
+    async uploadPrimaryImage(propertyId: string, file: File): Promise<PropertyEntity> {
+        const url = this.buildUrl(`${this.resourceEndpoint}/${propertyId}/primary-image`);
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const res = await fetch(url, {
+            method: "POST",
+            body: formData,
+        });
+
+        const text = await res.text();
+        const data: PropertyResponse = text ? JSON.parse(text) : null;
+
+        if (!res.ok || !data) {
+            const message =
+                (data as any)?.message ?? `Error al subir la imagen (${res.status})`;
+            throw new Error(message);
+        }
+
+        return mapPropertyFromResponse(data);
+    }
+
 }
 
 let propertyServiceInstance: PropertyService | null = null;
