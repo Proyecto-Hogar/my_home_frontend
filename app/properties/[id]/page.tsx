@@ -133,14 +133,10 @@ export default function PropertyDetailPage() {
 
     /* ------------------------------ IMAGE HANDLING ------------------------------ */
 
-    // const imageUrl = property.primaryImageFileId
-    //     ? getFileService().getUrl(property.primaryImageFileId)
-    //     : "/placeholder.png";
-
-    // ⬆⬆⬆
-    // POR AHORA NO HAY SERVICIO getFileById → dejar placeholder estático:
-
-    const imageUrl = "/images/placeholder-property.png";
+    const imageUrl =
+        property.primaryImageFileId && property.primaryImageFileId.trim().length > 0
+            ? property.primaryImageFileId
+            : "/images/placeholder-property.png";
 
     return (
         <SidebarLayout>
