@@ -166,10 +166,6 @@ export default function PropertyDetailPage() {
                             {translateStatus(property.status)}
                         </span>
                     </div>
-
-                    <Button onClick={() => router.push(`/properties/${property.id}/edit`)}>
-                        Editar propiedad
-                    </Button>
                 </div>
 
                 {/* ------------------------------ IMAGE HERO ------------------------------ */}
